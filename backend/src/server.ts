@@ -1,15 +1,15 @@
 import cors from "cors";
-import dotenv from "dotenv";
 import express, { Request, Response } from "express";
+import { env } from "./config/env";
 import { prisma } from "./lib/prisma";
-
-dotenv.config();
+import { authRouter } from "./routes/auth.routes";
 
 const app = express();
-const port = process.env.PORT ?? 5000;
 
 app.use(cors());
 app.use(express.json());
+
+app.use("/auth", authRouter);
 
 app.get("/health", (_req: Request, res: Response) => {
   res.status(200).json({
@@ -34,6 +34,6 @@ app.get("/health/db", async (_req: Request, res: Response) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Bio Tutor backend is running on port ${port}`);
+app.listen(env.port, () => {
+  console.log(`Bio Tutor backend is running on port ${env.port}`);
 });
