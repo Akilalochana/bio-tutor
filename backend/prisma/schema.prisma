@@ -6,3 +6,69 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+enum AnswerOption {
+  A
+  B
+  C
+  D
+  E
+}
+
+model User {
+  id         String     @id @default(cuid())
+  name       String
+  email      String     @unique
+  password   String
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
+  progress   Progress[]
+
+  @@map("users")
+}
+
+model Question {
+  id             String       @id @default(cuid())
+  year           Int
+  question_no    Int
+  text_si        String
+  text_en        String
+  options        Json
+  correct_answer AnswerOption
+  topic_id       String
+  created_at     DateTime     @default(now())
+  updated_at     DateTime     @updatedAt
+  topic          Syllabus     @relation(fields: [topic_id], references: [id])
+  progress       Progress[]
+
+  @@unique([year, question_no])
+  @@index([year])
+  @@index([topic_id])
+  @@map("questions")
+}
+
+model Syllabus {
+  id             String     @id @default(cuid())
+  unit_no        Int        @unique
+  title          String
+  content_chunks Json
+  created_at     DateTime   @default(now())
+  updated_at     DateTime   @updatedAt
+  questions      Question[]
+
+  @@map("syllabus")
+}
+
+model Progress {
+  user_id     String
+  question_id String
+  is_correct  Boolean
+  timestamp   DateTime @default(now()) @updatedAt
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  question    Question @relation(fields: [question_id], references: [id], onDelete: Cascade)
+
+  @@id([user_id, question_id])
+  @@index([question_id])
+  @@index([timestamp])
+  @@map("progress")
+}
