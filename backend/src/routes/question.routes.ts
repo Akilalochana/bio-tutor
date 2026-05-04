@@ -3,6 +3,7 @@ import { prisma } from "../lib/prisma";
 import { authGuard } from "../middleware/authGuard";
 
 const answerOptions = new Set(["A", "B", "C", "D", "E"]);
+const PAPER_YEAR_LIMIT = 20;
 
 type SubmittedAnswer = {
   question_id?: string;
@@ -13,6 +14,17 @@ export const questionRouter = Router();
 
 questionRouter.get("/questions/:year(\\d+)", async (req, res) => {
   const year = Number(req.params.year);
+  const currentYear = new Date().getFullYear();
+  const earliestAllowedYear = currentYear - PAPER_YEAR_LIMIT;
+
+  if (year < earliestAllowedYear || year > currentYear) {
+    res.status(400).json({
+      message: `Questions are available only from ${earliestAllowedYear} to ${currentYear}.`,
+      earliest_year: earliestAllowedYear,
+      latest_year: currentYear,
+    });
+    return;
+  }
 
   const questions = await prisma.question.findMany({
     where: { year },
