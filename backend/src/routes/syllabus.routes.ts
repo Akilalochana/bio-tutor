@@ -6,6 +6,33 @@ type SyllabusChunk = {
   content: string;
 };
 
+type SearchResult = {
+  unit_id: string;
+  unit_no: number;
+  title: string;
+  chunk_no: number;
+  content: string;
+  score: number;
+  matched_terms: string[];
+};
+
+const DEFAULT_SEARCH_LIMIT = 10;
+const MAX_SEARCH_LIMIT = 25;
+
+const searchSynonyms: Record<string, string[]> = {
+  biology: ["biology", "biological", "ජීව", "ජීව විද්‍යාව"],
+  cell: ["cell", "cells", "සෛල", "සෛලය"],
+  dna: ["dna", "ඩීඑන්ඒ", "ඩිඑන්ඒ"],
+  gene: ["gene", "genes", "ජානය", "ජාන"],
+  genetics: ["genetics", "inheritance", "ජාන විද්‍යාව", "උරුමය"],
+  evolution: ["evolution", "natural selection", "පරිණාමය", "ස්වාභාවික වරණය"],
+  ecology: ["ecology", "ecosystem", "environment", "පරිසරය", "පරිසර පද්ධති"],
+  producer: ["producer", "producers", "autotroph", "නිෂ්පාදක", "ස්වයංපෝෂක"],
+  meiosis: ["meiosis", "මියෝසිය"],
+  mitosis: ["mitosis", "මයිටොසිස", "මයිටෝසිස"],
+  respiration: ["respiration", "ATP", "ශ්වසනය"],
+};
+
 const normalizeChunks = (value: unknown): SyllabusChunk[] => {
   if (!Array.isArray(value)) {
     return [];
@@ -32,16 +59,106 @@ const normalizeChunks = (value: unknown): SyllabusChunk[] => {
     .filter((item): item is SyllabusChunk => item !== null);
 };
 
-const countMatches = (text: string, terms: string[]) => {
-  const normalizedText = text.toLowerCase();
+const normalizeText = (text: string) =>
+  text
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
-  return terms.reduce((score, term) => {
-    if (normalizedText.includes(term)) {
-      return score + 1;
+const buildExpandedTerms = (query: string) => {
+  const normalizedQuery = normalizeText(query);
+  const baseTerms = normalizedQuery.split(" ").filter(Boolean);
+  const expandedTerms = new Set<string>(baseTerms);
+
+  for (const term of baseTerms) {
+    for (const [key, synonyms] of Object.entries(searchSynonyms)) {
+      const normalizedKey = normalizeText(key);
+      const normalizedSynonyms = synonyms.map((item) => normalizeText(item));
+
+      if (term === normalizedKey || normalizedSynonyms.includes(term)) {
+        expandedTerms.add(normalizedKey);
+
+        for (const synonym of normalizedSynonyms) {
+          expandedTerms.add(synonym);
+        }
+      }
+    }
+  }
+
+  return {
+    normalizedQuery,
+    baseTerms,
+    expandedTerms: [...expandedTerms],
+  };
+};
+
+const countOccurrences = (text: string, term: string) => {
+  if (!term) {
+    return 0;
+  }
+
+  let count = 0;
+  let startIndex = 0;
+
+  while (true) {
+    const matchIndex = text.indexOf(term, startIndex);
+
+    if (matchIndex === -1) {
+      break;
     }
 
-    return score;
-  }, 0);
+    count += 1;
+    startIndex = matchIndex + term.length;
+  }
+
+  return count;
+};
+
+const scoreMatch = (title: string, content: string, normalizedQuery: string, baseTerms: string[], expandedTerms: string[]) => {
+  const normalizedTitle = normalizeText(title);
+  const normalizedContent = normalizeText(content);
+  const matchedTerms = new Set<string>();
+  let score = 0;
+
+  if (normalizedQuery.length > 0) {
+    if (normalizedTitle.includes(normalizedQuery)) {
+      score += 8;
+    }
+
+    if (normalizedContent.includes(normalizedQuery)) {
+      score += 12;
+    }
+  }
+
+  for (const term of expandedTerms) {
+    const titleOccurrences = countOccurrences(normalizedTitle, term);
+    const contentOccurrences = countOccurrences(normalizedContent, term);
+
+    if (titleOccurrences > 0 || contentOccurrences > 0) {
+      matchedTerms.add(term);
+      score += titleOccurrences * 4;
+      score += contentOccurrences * 2;
+    }
+  }
+
+  const matchedBaseTerms = baseTerms.filter(
+    (term) => normalizedTitle.includes(term) || normalizedContent.includes(term),
+  );
+
+  if (baseTerms.length > 1) {
+    score += matchedBaseTerms.length * 3;
+
+    if (matchedBaseTerms.length === baseTerms.length) {
+      score += 10;
+    }
+  }
+
+  return {
+    score,
+    matchedTerms: [...matchedTerms],
+  };
 };
 
 export const syllabusRouter = Router();
@@ -79,6 +196,11 @@ syllabusRouter.get("/syllabus/:unit(\\d+)", async (req, res) => {
 syllabusRouter.get("/syllabus/search", async (req, res) => {
   const rawQuery = req.query.query;
   const query = typeof rawQuery === "string" ? rawQuery.trim() : "";
+  const rawLimit = req.query.limit;
+  const limit =
+    typeof rawLimit === "string" && rawLimit.trim() !== ""
+      ? Number(rawLimit)
+      : DEFAULT_SEARCH_LIMIT;
 
   if (!query) {
     res.status(400).json({
@@ -87,11 +209,16 @@ syllabusRouter.get("/syllabus/search", async (req, res) => {
     return;
   }
 
-  const searchTerms = query
-    .toLowerCase()
-    .split(/\s+/)
-    .map((term) => term.trim())
-    .filter(Boolean);
+  if (!Number.isInteger(limit) || limit < 1 || limit > MAX_SEARCH_LIMIT) {
+    res.status(400).json({
+      message: `limit must be an integer between 1 and ${MAX_SEARCH_LIMIT}.`,
+      default_limit: DEFAULT_SEARCH_LIMIT,
+      max_limit: MAX_SEARCH_LIMIT,
+    });
+    return;
+  }
+
+  const { normalizedQuery, baseTerms, expandedTerms } = buildExpandedTerms(query);
 
   const syllabusUnits = await prisma.syllabus.findMany({
     select: {
@@ -105,17 +232,21 @@ syllabusRouter.get("/syllabus/search", async (req, res) => {
     },
   });
 
-  const matches = syllabusUnits
+  const matches: SearchResult[] = syllabusUnits
     .flatMap((unit) => {
-      const titleScore = countMatches(unit.title, searchTerms);
       const chunks = normalizeChunks(unit.content_chunks);
 
       return chunks
         .map((chunk) => {
-          const chunkScore = countMatches(chunk.content, searchTerms);
-          const totalScore = titleScore + chunkScore;
+          const { score, matchedTerms } = scoreMatch(
+            unit.title,
+            chunk.content,
+            normalizedQuery,
+            baseTerms,
+            expandedTerms,
+          );
 
-          if (totalScore === 0) {
+          if (score === 0) {
             return null;
           }
 
@@ -125,21 +256,11 @@ syllabusRouter.get("/syllabus/search", async (req, res) => {
             title: unit.title,
             chunk_no: chunk.chunk_no,
             content: chunk.content,
-            score: totalScore,
+            score,
+            matched_terms: matchedTerms,
           };
         })
-        .filter(
-          (
-            item,
-          ): item is {
-            unit_id: string;
-            unit_no: number;
-            title: string;
-            chunk_no: number;
-            content: string;
-            score: number;
-          } => item !== null,
-        );
+        .filter((item): item is SearchResult => item !== null);
     })
     .sort((a, b) => {
       if (b.score !== a.score) {
@@ -155,7 +276,10 @@ syllabusRouter.get("/syllabus/search", async (req, res) => {
 
   res.status(200).json({
     query,
-    count: matches.length,
-    results: matches,
+    normalized_query: normalizedQuery,
+    limit,
+    count: Math.min(matches.length, limit),
+    total_matches: matches.length,
+    results: matches.slice(0, limit),
   });
 });
