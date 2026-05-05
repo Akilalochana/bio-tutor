@@ -1,0 +1,7 @@
+$kind: http-request
+name: Random questions up to 30 mcqs
+url: http://localhost:5000/questions/random?limit=30
+method: GET
+queryParams:
+  limit: "30"
+order: 4274088440293211
