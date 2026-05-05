@@ -1,5 +1,5 @@
 $kind: http-request
-name: Question limit
+name: Question limit check
 url: http://localhost:5000/questions/2005
 method: GET
 order: 3998680611897562
