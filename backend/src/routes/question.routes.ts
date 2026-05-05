@@ -4,6 +4,25 @@ import { authGuard } from "../middleware/authGuard";
 
 const answerOptions = new Set(["A", "B", "C", "D", "E"]);
 const PAPER_YEAR_LIMIT = 20;
+const DEFAULT_RANDOM_QUESTION_LIMIT = 10;
+const MAX_RANDOM_QUESTION_LIMIT = 30;
+
+const questionSelect = {
+  id: true,
+  year: true,
+  question_no: true,
+  text_si: true,
+  text_en: true,
+  options: true,
+  topic_id: true,
+  topic: {
+    select: {
+      id: true,
+      unit_no: true,
+      title: true,
+    },
+  },
+} as const;
 
 type SubmittedAnswer = {
   question_id?: string;
@@ -11,6 +30,57 @@ type SubmittedAnswer = {
 };
 
 export const questionRouter = Router();
+
+const shuffleItems = <T>(items: T[]) => {
+  const shuffled = [...items];
+
+  for (let i = shuffled.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+
+  return shuffled;
+};
+
+questionRouter.get("/questions/random", async (req, res) => {
+  const currentYear = new Date().getFullYear();
+  const earliestAllowedYear = currentYear - PAPER_YEAR_LIMIT;
+  const rawLimit = req.query.limit;
+  const limit =
+    typeof rawLimit === "string" && rawLimit.trim() !== ""
+      ? Number(rawLimit)
+      : DEFAULT_RANDOM_QUESTION_LIMIT;
+
+  if (!Number.isInteger(limit) || limit < 1 || limit > MAX_RANDOM_QUESTION_LIMIT) {
+    res.status(400).json({
+      message: `limit must be an integer between 1 and ${MAX_RANDOM_QUESTION_LIMIT}.`,
+      default_limit: DEFAULT_RANDOM_QUESTION_LIMIT,
+      max_limit: MAX_RANDOM_QUESTION_LIMIT,
+    });
+    return;
+  }
+
+  const availableQuestions = await prisma.question.findMany({
+    where: {
+      year: {
+        gte: earliestAllowedYear,
+        lte: currentYear,
+      },
+    },
+    select: questionSelect,
+  });
+
+  const questions = shuffleItems(availableQuestions).slice(0, limit);
+
+  res.status(200).json({
+    count: questions.length,
+    requested_limit: limit,
+    available_count: availableQuestions.length,
+    earliest_year: earliestAllowedYear,
+    latest_year: currentYear,
+    questions,
+  });
+});
 
 questionRouter.get("/questions/:year(\\d+)", async (req, res) => {
   const year = Number(req.params.year);
@@ -29,22 +99,7 @@ questionRouter.get("/questions/:year(\\d+)", async (req, res) => {
   const questions = await prisma.question.findMany({
     where: { year },
     orderBy: { question_no: "asc" },
-    select: {
-      id: true,
-      year: true,
-      question_no: true,
-      text_si: true,
-      text_en: true,
-      options: true,
-      topic_id: true,
-      topic: {
-        select: {
-          id: true,
-          unit_no: true,
-          title: true,
-        },
-      },
-    },
+    select: questionSelect,
   });
 
   res.status(200).json({ year, count: questions.length, questions });
@@ -53,22 +108,7 @@ questionRouter.get("/questions/:year(\\d+)", async (req, res) => {
 questionRouter.get("/questions/:id", async (req, res) => {
   const question = await prisma.question.findUnique({
     where: { id: req.params.id },
-    select: {
-      id: true,
-      year: true,
-      question_no: true,
-      text_si: true,
-      text_en: true,
-      options: true,
-      topic_id: true,
-      topic: {
-        select: {
-          id: true,
-          unit_no: true,
-          title: true,
-        },
-      },
-    },
+    select: questionSelect,
   });
 
   if (!question) {
