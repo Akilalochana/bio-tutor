@@ -1,0 +1,8 @@
+$kind: http-request
+name: New Request
+url: http://localhost:5000/syllabus/search?query=ජීව විද්‍යාව&limit=5
+method: GET
+queryParams:
+  query: ජීව විද්‍යාව
+  limit: "5"
+order: 4492517323378022
