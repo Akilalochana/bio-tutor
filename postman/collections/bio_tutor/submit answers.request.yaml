@@ -1,4 +1,5 @@
 $kind: http-request
+name: submit answers
 url: http://localhost:5000/submit-answers
 method: POST
 body:
@@ -19,7 +20,7 @@ body:
 
     \      \"question_id\": \"cmopiu5oz0002fou36hoedu8y\",\r
 
-    \      \"answer\": \"B\"\r
+    \      \"answer\": \"C\"\r
 
     \    }\r
 

@@ -1,0 +1,8 @@
+$kind: http-request
+name: New Request
+url: http://localhost:5000/syllabus/search?query=ecology&limit=10
+method: GET
+queryParams:
+  query: ecology
+  limit: "10"
+order: 4390544916967496

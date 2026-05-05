@@ -1,0 +1,8 @@
+$kind: http-request
+name: http://localhost:5000/syllabus/search?query=cell&limit=5
+url: http://localhost:5000/syllabus/search?query=cell&limit=5
+method: GET
+queryParams:
+  query: cell
+  limit: "5"
+order: 1778007459125

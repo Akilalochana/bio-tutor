@@ -1,0 +1,8 @@
+$kind: http-request
+name: New Request
+url: http://localhost:5000/syllabus/search?query=DNA&limit=10
+method: GET
+queryParams:
+  query: DNA
+  limit: "10"
+order: 3652816489156782
