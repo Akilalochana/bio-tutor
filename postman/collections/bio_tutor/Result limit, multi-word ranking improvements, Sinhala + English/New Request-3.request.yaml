@@ -1,0 +1,8 @@
+$kind: http-request
+name: New Request
+url: http://localhost:5000/syllabus/search?query=සෛල&limit=5
+method: GET
+queryParams:
+  query: සෛල
+  limit: "5"
+order: 4407944092706264
