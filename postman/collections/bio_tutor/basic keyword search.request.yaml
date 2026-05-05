@@ -1,0 +1,7 @@
+$kind: http-request
+name: basic keyword search
+url: http://localhost:5000/syllabus/search?query=cell
+method: GET
+queryParams:
+  query: cell
+order: 4457234750936929
