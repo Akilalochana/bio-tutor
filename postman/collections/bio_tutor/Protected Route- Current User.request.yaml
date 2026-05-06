@@ -1,0 +1,9 @@
+$kind: http-request
+name: "Protected Route: Current User"
+url: http://localhost:5000/auth/me
+method: GET
+auth:
+  type: bearer
+  credentials:
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbW9vbjFtejIwMDAwYXd1M2UyNTFjZ2F4IiwiZW1haWwiOiJzdHVkZW50MUBleGFtcGxlLmNvbSIsImlhdCI6MTc3Nzc0NDQxMiwiZXhwIjoxNzc4MzQ5MjEyfQ.5UsjbTTdqJTKFwGtzWTXDtWN5wAZwDqZmHWJzcOnD-w
+order: 5000

@@ -1,0 +1,15 @@
+$kind: http-request
+url: http://localhost:5000/auth/signup
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"name\": \"Test Student\",\r
+
+    \  \"email\": \"student1@example.com\",\r
+
+    \  \"password\": \"password123\"\r
+
+    }\r\n"
+order: 2000
