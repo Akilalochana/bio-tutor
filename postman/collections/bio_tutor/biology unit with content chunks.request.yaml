@@ -1,0 +1,5 @@
+$kind: http-request
+name: biology unit with content chunks
+url: http://localhost:5000/syllabus/1
+method: GET
+order: 4376336872339650
