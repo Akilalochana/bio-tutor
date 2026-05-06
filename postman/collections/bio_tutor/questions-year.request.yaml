@@ -1,0 +1,5 @@
+$kind: http-request
+name: questions/year
+url: http://localhost:5000/questions/2023
+method: GET
+order: 7000

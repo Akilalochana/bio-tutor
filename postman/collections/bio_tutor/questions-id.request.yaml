@@ -1,0 +1,5 @@
+$kind: http-request
+name: questions/id
+url: http://localhost:5000/questions/cmopiu5bt0001fou3tbi4xex6
+method: GET
+order: 6000
