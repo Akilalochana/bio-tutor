@@ -1,0 +1,4 @@
+$kind: http-request
+url: http://localhost:5000/health/db
+method: GET
+order: 4000
