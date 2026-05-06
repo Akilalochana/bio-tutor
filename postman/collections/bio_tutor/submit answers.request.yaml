@@ -1,0 +1,33 @@
+$kind: http-request
+url: http://localhost:5000/submit-answers
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"answers\": [\r
+
+    \    {\r
+
+    \      \"question_id\": \"cmopiu5bt0001fou3tbi4xex6\",\r
+
+    \      \"answer\": \"A\"\r
+
+    \    },\r
+
+    \    {\r
+
+    \      \"question_id\": \"cmopiu5oz0002fou36hoedu8y\",\r
+
+    \      \"answer\": \"B\"\r
+
+    \    }\r
+
+    \  ]\r
+
+    }\r\n"
+auth:
+  type: bearer
+  credentials:
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbW9vbjFtejIwMDAwYXd1M2UyNTFjZ2F4IiwiZW1haWwiOiJzdHVkZW50MUBleGFtcGxlLmNvbSIsImlhdCI6MTc3Nzc5NzQyNSwiZXhwIjoxNzc4NDAyMjI1fQ.0ex5W8BiJY9bVWcQ7uix0ezQfpRJoSe5O4SxBkH9VtY
+order: 8000
