@@ -61,15 +61,18 @@ model Syllabus {
 }
 
 model Progress {
+  id          String   @id @default(cuid())
   user_id     String
   question_id String
+  submitted_answer AnswerOption
   is_correct  Boolean
-  timestamp   DateTime @default(now()) @updatedAt
+  timestamp   DateTime @default(now())
   user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
   question    Question @relation(fields: [question_id], references: [id], onDelete: Cascade)
 
-  @@id([user_id, question_id])
+  @@index([user_id])
   @@index([question_id])
   @@index([timestamp])
+  @@index([user_id, timestamp])
   @@map("progress")
 }
