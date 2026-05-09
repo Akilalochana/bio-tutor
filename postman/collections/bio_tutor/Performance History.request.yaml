@@ -1,0 +1,12 @@
+$kind: http-request
+name: Performance History
+url: http://localhost:5000/user/performance/history?limit=10&page=1
+method: GET
+queryParams:
+  limit: "10"
+  page: "1"
+auth:
+  type: bearer
+  credentials:
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbW92dXMwMjAwMDAwNmd1M251OHl5aGxvIiwiZW1haWwiOiJzdHVkZW50MUBleGFtcGxlLmNvbSIsImlhdCI6MTc3ODM1MDM4NCwiZXhwIjoxNzc4OTU1MTg0fQ.0sUA7GSC_mMnNuYbsHt57mL4KRMVTugpFhuQP4p5UIY
+order: 4498200908112851
