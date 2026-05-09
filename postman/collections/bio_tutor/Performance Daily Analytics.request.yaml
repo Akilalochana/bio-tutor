@@ -1,0 +1,11 @@
+$kind: http-request
+name: Performance Daily Analytics
+url: http://localhost:5000/user/performance/daily-analytics?days=7
+method: GET
+queryParams:
+  days: "7"
+auth:
+  type: bearer
+  credentials:
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbW92dXMwMjAwMDAwNmd1M251OHl5aGxvIiwiZW1haWwiOiJzdHVkZW50MUBleGFtcGxlLmNvbSIsImlhdCI6MTc3ODM1MDM4NCwiZXhwIjoxNzc4OTU1MTg0fQ.0sUA7GSC_mMnNuYbsHt57mL4KRMVTugpFhuQP4p5UIY
+order: 4501801475432337
