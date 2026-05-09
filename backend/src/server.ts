@@ -5,6 +5,7 @@ import { prisma } from "./lib/prisma";
 import { authRouter } from "./routes/auth.routes";
 import { questionRouter } from "./routes/question.routes";
 import { syllabusRouter } from "./routes/syllabus.routes";
+import { userRouter } from "./routes/user.routes";
 
 const app = express();
 
@@ -14,6 +15,7 @@ app.use(express.json());
 app.use("/auth", authRouter);
 app.use(questionRouter);
 app.use(syllabusRouter);
+app.use(userRouter);
 
 app.get("/health", (_req: Request, res: Response) => {
   res.status(200).json({
