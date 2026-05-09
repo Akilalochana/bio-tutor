@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { prisma } from "../lib/prisma";
 import { authGuard } from "../middleware/authGuard";
+import { AnswerOption } from "../generated/prisma/enums";
 
 const answerOptions = new Set(["A", "B", "C", "D", "E"]);
 const PAPER_YEAR_LIMIT = 20;
@@ -152,6 +153,14 @@ questionRouter.post("/submit-answers", authGuard, async (req, res) => {
     select: {
       id: true,
       correct_answer: true,
+      topic_id: true,
+      topic: {
+        select: {
+          id: true,
+          unit_no: true,
+          title: true,
+        },
+      },
     },
   });
   const questionsById = new Map(questions.map((question) => [question.id, question]));
@@ -166,6 +175,8 @@ questionRouter.post("/submit-answers", authGuard, async (req, res) => {
       correct_answer: question?.correct_answer ?? null,
       is_correct: Boolean(question && isCorrect),
       found: Boolean(question),
+      topic_id: question?.topic_id ?? null,
+      topic: question?.topic ?? null,
     };
   });
 
@@ -173,19 +184,11 @@ questionRouter.post("/submit-answers", authGuard, async (req, res) => {
     results
       .filter((result) => result.found)
       .map((result) =>
-        prisma.progress.upsert({
-          where: {
-            user_id_question_id: {
-              user_id: req.user.userId,
-              question_id: result.question_id,
-            },
-          },
-          update: {
-            is_correct: result.is_correct,
-          },
-          create: {
+        prisma.progress.create({
+          data: {
             user_id: req.user.userId,
             question_id: result.question_id,
+            submitted_answer: result.submitted_answer as AnswerOption,
             is_correct: result.is_correct,
           },
         }),
