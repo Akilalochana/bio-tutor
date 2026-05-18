@@ -1,0 +1,6 @@
+-keep class com.google.mediapipe.** { *; }
+-dontwarn com.google.mediapipe.**
+-keep class dev.flutterberlin.flutter_gemma.** { *; }
+-dontwarn com.google.mediapipe.proto.**
+-keep class dev.flutterberlin.** { *; }
+-dontwarn org.tensorflow.**
