@@ -147,7 +147,7 @@ This project was compiled for the **[Gemma 4 Good Hackathon](https://www.kaggle.
 - **Track:** Future of Education / Digital Equity & Inclusivity
 - 🎬 **Demo Video:** [Watch on YouTube](https://www.youtube.com/watch?v=gj4VTAFyiss)
 - 📦 **Live Demo APK:** [Download Android APK](https://github.com/Akilalochana/bio-tutor/releases/download/v1.0.0/app-release.apk)
-- 📝 **Kaggle Writeup:** [Read Technical Writeup][(#)](https://www.kaggle.com/competitions/gemma-4-good-hackathon/writeups/new-writeup-1776795486476)
+- 📝 **Kaggle Writeup:** [Read Technical Writeup](https://www.kaggle.com/competitions/gemma-4-good-hackathon/writeups/new-writeup-1776795486476)
 
 ---
 
