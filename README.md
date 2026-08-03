@@ -153,7 +153,7 @@ This project was compiled for the **[Gemma 4 Good Hackathon](https://www.kaggle.
 
 ## 📄 License
 
-This project is open-source. See the [LICENSE](LICENSE) file for details.
+This project is open-source. See the [LICENSE](https://creativecommons.org/licenses/by/4.0/) file for details.
 
 ---
 
